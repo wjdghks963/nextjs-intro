@@ -21,6 +21,16 @@ SSR, 파일 기반 라우팅, 풀스택 빌드 구현을 위한 framework다.
 
      3. https://helloinyong.tistory.com/315
 
+3. `package.json script` 정정
+
+- 'dev' - 'next dev' 개발 모드에서 Next.js 를 시작하는 실행 / 핫 코드 리로딩 지원
+
+- 'build' - 'next build' 프로덕션 용도로 애플리케이션을 빌드하는 실행
+
+- 'start' - 'next start' Next.js 프로덕션 서버를 시작하는 실행 / 빌드된 Next application을 실행
+
+<br>
+
 ## pages
 
 1. 약속과 routing
@@ -62,3 +72,30 @@ ex) about-us >> 404 error
         <a >About</a>
         </Link>
 ```
+
+## module.css
+
+CSS 모듈이라는 패턴으로 우리가 일반적인 CSS를 사용할 수 있게 해준다.
+
+페이지가 빌드될 때 Next가 클래스 이름을 무작위로 바꿔준다.
+이것은 우리가 클래스 이름 충돌을 겪지 않도록 해준다.
+
+1. 사용방법
+   somthing.module.css 라고 css 파일이름을 짓고 사용하고 싶은 파일에서 `import styles from "./somthing.module.css";`를 해준다.
+
+   `somthing`은 꼭 js의 파일이 아니어도 된다.
+
+2. className
+   여기에서 className은 예전처럼 쓰는 css에서 그대로 이름을 string으로 가져오는게 아니라 js를 이용해야한다.
+
+   ```javascript
+   import styles from "./somthing.module.css";
+   <a className= {styles.link}>
+   ```
+
+   와 같이 사용하는데 만약 className을 두개 주고 싶다면 방법은 두가지가 존대한다.
+
+   1. ``을 사용해서 두가지를 집어 넣는 방법
+      `${styles.link} ${router.pathname === "/" ? styles.active : ""}`
+   2. array를 만들어서 join을 하는 방법
+      `[styles.link, router.pathname === "/about" ? styles.active : ""].join(" ")`
