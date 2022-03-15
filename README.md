@@ -73,9 +73,13 @@ ex) about-us >> 404 error
         </Link>
 ```
 
+<br>
+
+# Style
+
 ## module.css
 
-CSS 모듈이라는 패턴으로 우리가 일반적인 CSS를 사용할 수 있게 해준다.
+우리가 원래 사용하던 방식으로 page나 component에 css를 import할 수 없기때문에 CSS 모듈이라는 패턴으로 우리가 일반적인 CSS를 사용할 수 있게 해준다.
 
 페이지가 빌드될 때 Next가 클래스 이름을 무작위로 바꿔준다.
 이것은 우리가 클래스 이름 충돌을 겪지 않도록 해준다.
@@ -95,7 +99,62 @@ CSS 모듈이라는 패턴으로 우리가 일반적인 CSS를 사용할 수 있
 
    와 같이 사용하는데 만약 className을 두개 주고 싶다면 방법은 두가지가 존대한다.
 
-   1. ``을 사용해서 두가지를 집어 넣는 방법
-      `${styles.link} ${router.pathname === "/" ? styles.active : ""}`
+   1. ``을 사용해서 두가지를 집어 넣는 방법 `${styles.link} ${router.pathname === "/" ? styles.active : ""}`
    2. array를 만들어서 join을 하는 방법
       `[styles.link, router.pathname === "/about" ? styles.active : ""].join(" ")`
+
+## Style JSX
+
+next js의 고유의 스타일링이라 할 정도로 다른것들은 사용할때 잘 사용하지 않는다.
+
+완전 독립적이라 부모 컴포넌트가 자식 컴포넌트의 클래스 이름을 사용하고 있더라도 상관이 없다.
+
+클래스 이름을 붙혀주면 자동적으로 뒤에 새로운 클래스 이름을 또 붙여줘 자동적으로 유니크하게 만들어준다.
+
+1. 사용방법
+   일반 JSX파일에 <style>태그를 넣는다.
+
+```javascript
+<style jsx>{`
+  nav {
+    background-color: tomato;
+  }
+  a {
+    text-decoration: none;
+  }
+`}</style>
+```
+
+2. global
+   부모 컴포넌트에서 자식 컴포넌트에게 스타일을 주더라도 받지 않고 자기가 가지고 있는 스타일 만을 사용하는데 이걸 주기 위해서는 global이라는 props를 사용한다.
+
+   부모 컴포넌트에게 `<style jsx global>`을 사용하면 같은 클래스 이름을 갖고 있는 클래스에게 스타일을 물려줄 수 있다.
+
+# App Component (Custom App Component)
+
+컴포넌트의 청사진이라 할 수 있다.
+어떻게 페이지가 있어야 하는지, 어떤 컴포넌트가 어떤 페이지에 있어야 하는지...
+
+파일명은 무조건 `_app.js`으로 이름이 정해져있다.
+
+rendering이 되기전에 `_app.js`를 보고난 후에 pages 폴더의 내용물들을 하나하나 보고 rendering하고 다시 `_app.js`를 보고 다음 pages의 파일을 보고 rendering하고 ... 이런 식으로 rendering을 해준다.
+
+기본적으로 App은 아래와 같이 보이는 상태이다.
+
+```javascript
+export default function App({ Component, pageProps }) {
+  return <Component {...pageProps} />;
+}
+```
+
+여기서는 일반적인 css파일을 import할 수 있다.
+
+1. 정의
+   \_app은 서버로 요청이 들어왔을 때 가장 먼저 실행되는 컴포넌트로 페이지에 적용할 공통 레이아웃 역할을 한다.
+
+2. 기능
+   - 페이지들이 변화할 때 레이아웃 유지
+   - 페이지를 navigating(탐색)할 때 state 유지
+   - `componentDidCath`로 사용자 에러 관리
+   - 페이지들에 추가데이터 사용(주입)가능
+   - 글로벌 CSS 추가
