@@ -9,7 +9,7 @@ SSR, 파일 기반 라우팅, 풀스택 빌드 구현을 위한 framework다.
 
 2. NextJs 장점
 
-   - 앱에 있는 페이지들이 미리 redering된다. 이것들은 static하게 생성된다.
+   - 앱에 있는 페이지들이 미리 redering된다. 이것들은 static하게 생성된다. (SSR)
 
      1. 실제 HTML이 생성됨, JS가 없거나 인터넷이 느려도 HTML은 빠르게 볼 수있음.
 
@@ -28,6 +28,12 @@ SSR, 파일 기반 라우팅, 풀스택 빌드 구현을 위한 framework다.
 - 'build' - 'next build' 프로덕션 용도로 애플리케이션을 빌드하는 실행
 
 - 'start' - 'next start' Next.js 프로덕션 서버를 시작하는 실행 / 빌드된 Next application을 실행
+
+4. next.js 를 실행하는 명령어
+
+```javascript
+npm run dev
+```
 
 <br>
 
@@ -107,7 +113,7 @@ ex) about-us >> 404 error
 
 next js의 고유의 스타일링이라 할 정도로 다른것들은 사용할때 잘 사용하지 않는다.
 
-완전 독립적이라 부모 컴포넌트가 자식 컴포넌트의 클래스 이름을 사용하고 있더라도 상관이 없다.
+_완전 독립적이라 부모 컴포넌트가 자식 컴포넌트의 클래스 이름을 사용하고 있더라도 상관이 없다._
 
 클래스 이름을 붙혀주면 자동적으로 뒤에 새로운 클래스 이름을 또 붙여줘 자동적으로 유니크하게 만들어준다.
 
@@ -147,14 +153,114 @@ export default function App({ Component, pageProps }) {
 }
 ```
 
-여기서는 일반적인 css파일을 import할 수 있다.
+여기서는 일반적인 css파일인 global.css를 import할 수 있다.
 
 1. 정의
    \_app은 서버로 요청이 들어왔을 때 가장 먼저 실행되는 컴포넌트로 페이지에 적용할 공통 레이아웃 역할을 한다.
 
 2. 기능
+
    - 페이지들이 변화할 때 레이아웃 유지
    - 페이지를 navigating(탐색)할 때 state 유지
    - `componentDidCath`로 사용자 에러 관리
    - 페이지들에 추가데이터 사용(주입)가능
    - 글로벌 CSS 추가
+
+3. Component와 pageProps는 뭘까?
+
+   ```javascript
+   console.log(Component);
+   console.log(pageProps);
+   ```
+
+   위와 같은 `console.log`를 찍는다면
+
+   1. Component는 현재 내가 위치해 있는 component의 함수를 리턴해준다. 이 함수는 내가 위치가 바뀔때마다 바뀐다.
+
+   2. pageProps는 Object를 반환한다.
+      공식 문서 설명 : pageProps is an object with the initial props that were preloaded for your page by one of our data fetching methods, otherwise it's an empty object.
+
+# next에서 제공하는 기능
+
+head관리 부분과 같이 만약 react를 사용한다면 react-helmet부터 다른 설정, 코드들을 만들어야하는데 next에서 제공해주는 작은 패키지들이 존재해 이런것들을 그냥 공짜로 제공받아 사용할 수 있다.
+
+ex) next/head
+
+```javascript
+import Head from "next/head";
+
+export default function Seo({ title }) {
+  return (
+    <Head>
+      <title>{title} | Next Movies</title>
+    </Head>
+  );
+}
+```
+
+# next.config.js
+
+Next.js에서 커스텀 설정을 하기 위해서는 프로젝트 디렉터리의 루트(package.json 옆)에 next.config.js 또는 next.config.mjs 파일을 만들어서 사용한다.
+next.config.js는 JSON 파일이 아닌 일반 Node.js 모듈이며 Next.js 서버 및 빌드 단계에서 사용되며 브라우저 빌드에는 포함되지 않는다.
+
+https://nextjs.org/docs/api-reference/next.config.js/introduction
+
+```javascript
+module.exports = {
+  reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/old-blog/:path*",
+        destination: "/new-sexy-blog/:path*",
+        permanent: false,
+      },
+      {
+        source: "/old-post/:path*",
+        destination: "/new-sexy-post/:path*",
+        permanent: false,
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/movies",
+        destination: `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}`,
+      },
+    ];
+  },
+};
+```
+
+1. redirects
+   들어오는 요청 경로를 다른 대상 경로로 redirection할 수 있다.
+
+- `source` : 들어오는 요청 경로
+- `destination` : redirect할 경로
+- `permanent` : 검색 엔진에 redirection을 영구적으로 cache하도록 지시함 값은 boolean
+
+ex) 만약 /post로 유저가 들어간다면 /으로 보내고 싶다
+
+```javascript
+async redirects() {
+   return [
+      {
+         source: "/post",
+         descrionation :"/",
+         permanent :false
+      }
+   ]
+}
+```
+
+2. rewrites
+   들어오는 요청 경로를 다른 대상 경로로 매핑할 수 있다.
+
+   URL 프록시 역할을 하고 대상 경로를 마스킹하여 사용자가 사이트에서 위치를 변경하지 않은 것처럼 보이게한다.
+   반대로 리디렉션은 새 페이지로 다시 라우팅되고 URL 변경 사항을 표시한다.
+
+- `source` : 들어오는 요청 경로
+- `destination` : route할 경로
+
+destination의 경로를 불러오며 url은 source에 해당하는 경로를 유지한다(masking).
