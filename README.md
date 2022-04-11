@@ -108,8 +108,11 @@ ex) about-us >> 404 error
 
 7. next에서 주는 router
    `router`에는 많은 메서드가 내장되어 있으며 보통 url에 query를 담아 이동시킬때 `push`를 사용한다.
-   만약 이 query를 담은 Link를 이용해 url을 이동하지 않고 직접적으로 외부에서 자원이 필요한 페이지로 이동할땐 데이터를 받아 올 수 없다.
+   만약 이 query를 담은 Link를 이용해 url을 이동하지 않고 직접적으로 외부(secret mode)에서 자원이 필요한 페이지로 이동할땐 데이터를 받아 올 수 없다.
    외부 뿐만 아니라 같은 페이지에 있는 query를 가지고 있지 않고 이동시키는 Link들도 마찬가지다.
+
+   https://github.com/wjdghks963/nextjs-intro/commit/c4552b2e1eaaf5a4cf870209d7c5cb3d1ad052ee
+
    <br>
 
 # Style
