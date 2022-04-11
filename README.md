@@ -79,7 +79,38 @@ ex) about-us >> 404 error
         </Link>
 ```
 
-<br>
+5. nesting routes(중접되는 라우츠)를 사용해야하면 어떻게 해야할까
+
+   만약에 내가 route를 구성할때 `/movies` 와 `/mmovies/all`과 같이 사용해야할 때가 왔다고 가정한다.
+   그러면 pages의 구성을 어떻게 해야할까
+
+   > nesting을 시작하는 이름으로 folder를 만들고 그 안에 파일을 만든다.
+   > 폴더의 구성요소를 다음과 같게 한다.
+   > /pages/moives/index.js
+   > /pages/moives/all.js
+
+6. 그럼 CRA의 react-router-dom에서 사용하는 `:id`와 같이 변수를 이용하는 Dynamic URL을 이용하고 싶을 떈 어떻게 해야할까
+
+   [id].js 파일을 만든다.
+   대괄호에 들어가는 변수명은 여기서도 마찬가지로 내가 설정한다.
+
+   id는 어떻게 받을까 next 내장 함수인 useRouter를 이용한다.
+   [id].js
+
+   ```javascript
+   import { useRouter } from "next/router";
+
+   export default function Detial() {
+     const router = useRouter();
+     return;
+   }
+   ```
+
+7. next에서 주는 router
+   `router`에는 많은 메서드가 내장되어 있으며 보통 url에 query를 담아 이동시킬때 `push`를 사용한다.
+   만약 이 query를 담은 Link를 이용해 url을 이동하지 않고 직접적으로 외부에서 자원이 필요한 페이지로 이동할땐 데이터를 받아 올 수 없다.
+   외부 뿐만 아니라 같은 페이지에 있는 query를 가지고 있지 않고 이동시키는 Link들도 마찬가지다.
+   <br>
 
 # Style
 
@@ -93,21 +124,21 @@ ex) about-us >> 404 error
 1. 사용방법
    somthing.module.css 라고 css 파일이름을 짓고 사용하고 싶은 파일에서 `import styles from "./somthing.module.css";`를 해준다.
 
-   `somthing`은 꼭 js의 파일이 아니어도 된다.
+`somthing`은 꼭 js의 파일이 아니어도 된다.
 
 2. className
    여기에서 className은 예전처럼 쓰는 css에서 그대로 이름을 string으로 가져오는게 아니라 js를 이용해야한다.
 
-   ```javascript
-   import styles from "./somthing.module.css";
-   <a className= {styles.link}>
-   ```
+```javascript
+import styles from "./somthing.module.css";
+<a className= {styles.link}>
+```
 
-   와 같이 사용하는데 만약 className을 두개 주고 싶다면 방법은 두가지가 존대한다.
+와 같이 사용하는데 만약 className을 두개 주고 싶다면 방법은 두가지가 존대한다.
 
-   1. ``을 사용해서 두가지를 집어 넣는 방법 `${styles.link} ${router.pathname === "/" ? styles.active : ""}`
-   2. array를 만들어서 join을 하는 방법
-      `[styles.link, router.pathname === "/about" ? styles.active : ""].join(" ")`
+1.  ``을 사용해서 두가지를 집어 넣는 방법 `${styles.link} ${router.pathname === "/" ? styles.active : ""}`
+2.  array를 만들어서 join을 하는 방법
+    `[styles.link, router.pathname === "/about" ? styles.active : ""].join(" ")`
 
 ## Style JSX
 
@@ -264,3 +295,42 @@ async redirects() {
 - `destination` : route할 경로
 
 destination의 경로를 불러오며 url은 source에 해당하는 경로를 유지한다(masking).
+
+# SSR
+
+## getServerSideProps()
+
+getServerSideProps는 server에서 실행되며 브라우저에서는 실행되지 않는다.
+Next.js는 getServerSideProps에서 반환된 데이터를 사용하여 각 request에서 이 페이지를 pre-render한다.
+무엇을 return하던 props로서 page에게 주게된다.
+
+> 이게 무슨 뜻이냐
+> 우리가 \_app.js에서 사용했던 코드를 보면 Component, pageProps가 있었다.
+
+```javascript
+export default function App({ Component, pageProps }) {
+  return <Component {...pageProps} />;
+}
+```
+
+> 위에서 Component는 내가 렌더링하는 component이며 pageProps가 `getSeverSideProps`에서 return한 props로서 들어간다.
+> 즉 props를 전달하는 함수에서는 꼭! export를 해야하며 받는 compoenent는 인자로서 꼭! 전달받아야한다.
+
+```javascript
+export default function Home({results}){...}
+```
+
+이것은 데이터가 받아오기 전까지 빈화면을 보여준다. 이 함수 안에서 fetch는 프론트를 이용한 경로를 모르기 때문에 절대경로를 이용한다.
+
+```javascript
+export async function getServerSideProps() {
+  const { results } = await (
+    await fetch(`http://localhost:3000//api/movies`)
+  ).json();
+  return {
+    props: {
+      results,
+    },
+  };
+}
+```
